@@ -39,7 +39,7 @@ node {
                  """
         }
         stage("Start Cloud Manager Build") {
-            step([$class: 'CloudManagerBuilder', pipeline: pipelineId, program: programId])
+            step([$class: 'CloudManagerBuilder', pipeline: '${pipelineId}', program: '${programId}'])
         }
         stage("Gather Advance Parameters") {
             timeout(time: 30, unit: 'SECONDS') {
