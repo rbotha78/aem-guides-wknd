@@ -43,12 +43,18 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'cm-creds', passwordVariable: 'pass', usernameVariable: 'user')]) {
                     // the code in here can access $pass and $user
                     sh("""
-                     echo "Adding CM git repo remote"
-                     git remote add cm-repo "https://$user:$pass@${cmURL}"
-
-                     echo "Pushing to CM repo"
-                     git push -f cm-repo ${env.BRANCH_NAME}:${remoteBranch}
-                     """
+                        echo "Adding CM git repo remote"
+                        git remote add cm-repo "https://$user:$pass@${cmURL}"
+    
+                        echo "Pushing to CM repo"
+                        if [ ${env.BRANCH_NAME} = ${remoteBranch} ]
+                        then
+                            git push -f cm-repo HEAD:${env.BRANCH_NAME}
+                        else
+                            git push -f cm-repo ${env.BRANCH_NAME}:${remoteBranch}
+                        fi
+                        
+                    """
                     )
                 }
             }
