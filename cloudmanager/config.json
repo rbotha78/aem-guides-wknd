@@ -1,0 +1,13 @@
+{
+  "program": 13954,
+  "pipeline-mapping": {
+    "master": {
+      "remote" : "master",
+      "pipeline" : 574990
+    },
+    "feature/robert": {
+      "remote" : "robert",
+      "pipeline" : 626552
+    }
+  }
+}
