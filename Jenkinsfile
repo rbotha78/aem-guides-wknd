@@ -36,36 +36,33 @@ pipeline {
             }
         }
 
-        withCredentials([usernamePassword(credentialsId: 'cm-creds', passwordVariable: 'pass', usernameVariable: 'user')]) {
-            // the code in here can access $pass and $user
-            stage("Start Cloud Manager Build") {
-                steps {
-                    step([$class: 'CloudManagerBuilder', pipeline: pipelineId.toString(), program: programId.toString()])
-                }
+        stage("Start Cloud Manager Build") {
+            steps {
+                step([$class: 'CloudManagerBuilder', pipeline: pipelineId.toString(), program: programId.toString()])
             }
+        }
 
-            stage("Gather Advance Parameters") {
-                when {
-                    experssion { params.VALIDATION == 'fail' }
-                }
-                steps {
-                    timeout(time: 30, unit: 'SECONDS') {
-                        script {
-                            // Show the select input modal
-                            def INPUT_PARAMS = input message: 'Override metrics', ok: 'Override',
-                                    parameters: [
-                                            choice(name: 'METRIC_1', choices: ['Yes', 'No'].join('\n'), description: 'Override metric 1'),
-                                            choice(name: 'METRIC_2', choices: ['Yes', 'No'].join('\n'), description: 'Override metric 2')]
-                            env.OVERRIDE = [INPUT_PARAMS.METRIC_1, INPUT_PARAMS.METRIC_2].join('\n')
-                        }
+        stage("Gather Advance Parameters") {
+            when {
+                experssion { params.VALIDATION == 'fail' }
+            }
+            steps {
+                timeout(time: 30, unit: 'SECONDS') {
+                    script {
+                        // Show the select input modal
+                        def INPUT_PARAMS = input message: 'Override metrics', ok: 'Override',
+                                parameters: [
+                                        choice(name: 'METRIC_1', choices: ['Yes', 'No'].join('\n'), description: 'Override metric 1'),
+                                        choice(name: 'METRIC_2', choices: ['Yes', 'No'].join('\n'), description: 'Override metric 2')]
+                        env.OVERRIDE = [INPUT_PARAMS.METRIC_1, INPUT_PARAMS.METRIC_2].join('\n')
                     }
                 }
             }
-            stage("Use Advance Parameters") {
-                steps {
-                    script {
-                        echo "Override: ${env.OVERRIDE}"
-                    }
+        }
+        stage("Use Advance Parameters") {
+            steps {
+                script {
+                    echo "Override: ${env.OVERRIDE}"
                 }
             }
         }
