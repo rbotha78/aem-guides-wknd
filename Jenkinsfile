@@ -12,6 +12,15 @@ node {
                  """
         }
 
+        stage('Validate configs') {
+            def config = readJSON file: 'cloudmanager/config.json'
+
+            script {
+                echo "Program: ${config['program']}"
+                echo "Branch: ${env.BRANCH_NAME}"
+            }
+        }
+
         stage('Push to Cloud Manager Repository') {
             sh """
                          echo "Adding CM git repo remote"
@@ -25,7 +34,7 @@ node {
                  """
         }
         stage("Start Cloud Manager Build") {
-            step([$class: 'CloudManagerBuilder', pipeline: '626552', program: '13954'])
+            //step([$class: 'CloudManagerBuilder', pipeline: '626552', program: '13954'])
         }
         stage("Gather Advance Parameters") {
             timeout(time: 30, unit: 'SECONDS') {
