@@ -44,7 +44,7 @@ pipeline {
 
         stage("Gather Advance Parameters") {
             when {
-                experssion { params.VALIDATION == 'fail' }
+                expression { params.VALIDATION == 'fail' }
             }
             steps {
                 timeout(time: 30, unit: 'SECONDS') {
