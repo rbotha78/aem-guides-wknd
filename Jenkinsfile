@@ -7,7 +7,7 @@ node {
     def cmURL = 'git.cloudmanager.adobe.com/emeaaem/Hackathon-EMEAAEMConsultingProgram-p13954'
 
     stage('Git Checkout branch') {
-        checkout([$class: 'GitSCM', branches: [[name: env.BRANCH_NAME]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CleanBeforeCheckout', deleteUntrackedNestedRepositories: true]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'Github', url: gitURL]]])
+        checkout([$class: 'GitSCM', branches: [[name: env.BRANCH_NAME]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CleanBeforeCheckout', deleteUntrackedNestedRepositories: true]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'github', url: gitURL]]])
     }
 
     withCredentials([usernamePassword(credentialsId: 'cm-creds', passwordVariable: 'pass', usernameVariable: 'user')]) {
@@ -21,8 +21,8 @@ node {
 
             script {
                 echo "Program: ${programId}"
-                echo "Branch: ${pipelineId}"
-                echo "Remote: ${remoteBranch}"
+                echo "Pipeline: ${pipelineId}"
+                echo "Remote Branch: ${remoteBranch}"
             }
         }
 
@@ -32,14 +32,14 @@ node {
                          git remote add cm-repo "https://$user:$pass@$cmURL"
 
                          echo "Pushing to CM repo"
-                         git push -f cm-repo ${env.BRANCH_NAME}
+                         git push -f cm-repo ${env.BRANCH_NAME}:${remoteBranch}
 
                          echo "Remove CM repo remote reference"
                          git remote rm cm-repo
                  """
         }
         stage("Start Cloud Manager Build") {
-            //step([$class: 'CloudManagerBuilder', pipeline: '626552', program: '13954'])
+            step([$class: 'CloudManagerBuilder', pipeline: pipelineId, program: programId])
         }
         stage("Gather Advance Parameters") {
             timeout(time: 30, unit: 'SECONDS') {
