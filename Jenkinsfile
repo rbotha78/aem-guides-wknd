@@ -6,12 +6,6 @@ def cmURL = 'git.cloudmanager.adobe.com/emeaaem/Hackathon-EMEAAEMConsultingProgr
 
 pipeline {
     agent any
-    parameters {
-        choice(
-                choices: ['pass', 'fail'],
-                description: 'Pass validation',
-                name: 'VALIDATION')
-    }
 
     stages {
         stage('Git Checkout branch') {
@@ -36,13 +30,28 @@ pipeline {
             }
         }
 
-        stage("Start Cloud Manager Build") {
+//        stage('Start Cloud Manager Build') {
+//            steps {
+//                step([$class: 'CloudManagerBuilder', pipeline: pipelineId.toString(), program: programId.toString()])
+//            }
+//        }
+
+        stage('Validation Result') {
+            input {
+                message "Did build pass validation?"
+                parameters {
+                    choice(
+                            choices: ['pass', 'fail'],
+                            description: 'Validation',
+                            name: 'VALIDATION')
+                }
+            }
             steps {
-                step([$class: 'CloudManagerBuilder', pipeline: pipelineId.toString(), program: programId.toString()])
+                echo "Validation: ${VALIDATION}"
             }
         }
 
-        stage("Gather Advance Parameters") {
+        stage('Gather Advance Parameters') {
             when {
                 expression { params.VALIDATION == 'fail' }
             }
@@ -59,12 +68,19 @@ pipeline {
                 }
             }
         }
-        stage("Use Advance Parameters") {
+        stage('Use Advance Parameters') {
             steps {
                 script {
                     echo "Override: ${env.OVERRIDE}"
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Running after the stages'
+            echo 'TODO: Remove remote here'
         }
     }
 }
