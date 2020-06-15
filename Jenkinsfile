@@ -1,5 +1,8 @@
 #!groovy
 node {
+    // get latest from GIT
+    checkout scm
+
     withCredentials([usernamePassword(credentialsId: 'cm-creds', passwordVariable: 'pass', usernameVariable: 'user')]) {
         // the code in here can access $pass and $user
         stage('Git Checkout branch') {
