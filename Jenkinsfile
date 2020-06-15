@@ -10,7 +10,15 @@ pipeline {
     stages {
         stage('Git Checkout branch') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: env.BRANCH_NAME]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CleanBeforeCheckout', deleteUntrackedNestedRepositories: true]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'github', url: gitURL]]])
+                checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: env.BRANCH_NAME]],
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions: [[$class: 'CleanBeforeCheckout',
+                                      deleteUntrackedNestedRepositories: true]],
+                        submoduleCfg: [],
+                        userRemoteConfigs: [[credentialsId: 'github',
+                                             url: gitURL]]])
             }
         }
 
@@ -30,13 +38,29 @@ pipeline {
             }
         }
 
-//        stage('Start Cloud Manager Build') {
-//            steps {
-//                step([$class: 'CloudManagerBuilder', pipeline: pipelineId.toString(), program: programId.toString()])
-//            }
-//        }
+        stage('Push Code to Cloud Manager') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'cm-creds', passwordVariable: 'pass', usernameVariable: 'user')]) {
+                    // the code in here can access $pass and $user
+                    sh("""
+                     echo "Adding CM git repo remote"
+                     git remote add cm-repo "https://$user:$pass@${cmURL}"
 
-        stage('Validation Result') {
+                     echo "Pushing to CM repo"
+                     git push -f cm-repo ${env.BRANCH_NAME}:${remoteBranch}
+                     """
+                    )
+                }
+            }
+        }
+
+        stage('Start Cloud Manager Build') {
+            steps {
+                step([$class: 'CloudManagerBuilder', pipeline: pipelineId.toString(), program: programId.toString()])
+            }
+        }
+
+        stage('Gather Advance Parameters') {
             input {
                 message "Did build pass validation?"
                 parameters {
@@ -46,14 +70,8 @@ pipeline {
                             name: 'VALIDATION')
                 }
             }
-            steps {
-                echo "Validation: ${VALIDATION}"
-            }
-        }
-
-        stage('Gather Advance Parameters') {
             when {
-                expression { params.VALIDATION == 'fail' }
+                expression { VALIDATION == 'fail' }
             }
             steps {
                 timeout(time: 30, unit: 'SECONDS') {
@@ -63,6 +81,7 @@ pipeline {
                                 parameters: [
                                         choice(name: 'METRIC_1', choices: ['Yes', 'No'].join('\n'), description: 'Override metric 1'),
                                         choice(name: 'METRIC_2', choices: ['Yes', 'No'].join('\n'), description: 'Override metric 2')]
+
                         env.OVERRIDE = [INPUT_PARAMS.METRIC_1, INPUT_PARAMS.METRIC_2].join('\n')
                     }
                 }
@@ -79,8 +98,14 @@ pipeline {
 
     post {
         always {
-            echo 'Running after the stages'
-            echo 'TODO: Remove remote here'
+            script {
+                sh """
+                echo 'Running after the stages'
+
+                echo "Remove CM repo remote reference"
+                git remote rm cm-repo
+                """
+            }
         }
     }
 }
