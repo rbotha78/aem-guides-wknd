@@ -47,12 +47,7 @@ pipeline {
                         git remote add cm-repo "https://$user:$pass@${cmURL}"
     
                         echo "Pushing to CM repo"
-                        if [ ${env.BRANCH_NAME} = ${remoteBranch} ]
-                        then
-                            git push -f cm-repo HEAD:${env.BRANCH_NAME}
-                        else
-                            git push -f cm-repo ${env.BRANCH_NAME}:${remoteBranch}
-                        fi
+                        git push -f cm-repo HEAD:${remoteBranch}
                         
                     """
                     )
