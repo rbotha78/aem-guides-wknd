@@ -8,6 +8,10 @@
     "feature/robert": {
       "remote" : "robert",
       "pipeline" : 626552
+    },
+    "feature/lars": {
+      "remote" : "lars",
+      "pipeline" : 626214
     }
   }
 }
