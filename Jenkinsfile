@@ -57,7 +57,7 @@ pipeline {
 
         stage('Start Cloud Manager Build') {
             steps {
-                step([$class: 'CloudManagerBuilder', pipeline: pipelineId.toString(), program: programId.toString(), polling: true])
+                step([$class: 'CloudManagerBuilder', pipeline: pipelineId.toString(), program: programId.toString(), polling: false])
             }
         }
 
