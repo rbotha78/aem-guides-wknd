@@ -47,7 +47,7 @@ pipeline {
                         git remote add cm-repo "https://$user:$pass@${cmURL}"
     
                         echo "Pushing to CM repo"
-                        git push -f cm-repo HEAD:${remoteBranch}
+                        git push -f cm-repo HEAD:refs/heads/${remoteBranch}
                         
                     """
                     )
