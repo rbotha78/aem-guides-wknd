@@ -9,6 +9,10 @@
       "remote" : "robert",
       "pipeline" : 626552
     },
+    "feature/bad": {
+      "remote" : "bad",
+      "pipeline" : 630604
+    },
     "feature/lars": {
       "remote" : "lars",
       "pipeline" : 626214
